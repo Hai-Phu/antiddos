@@ -96,11 +96,6 @@ FEATURES=["flow_duration","fwd_pkt_len_max",
           "pkt_len_max","pkt_len_std","ack_flag_cnt","pkt_size_avg",
           "subflow_fwd_pkts","init_fwd_win_byts","fwd_seg_size_min"]
 
-CHECKASN = {'google','facebook','youtube','amazon','microsoft',
-            'shopee','fpt','vietel','vnpt','vng','telegram',
-            'valve','opera','alibaba','cloudflarenet','fastly',
-            'vietcombank','cmctelecom','saigon','wikimedia','cloud'}
-
 class FlowSession(DefaultSession):
     """Creates a list of network flows."""
     def __init__(self, *args, **kwargs):
@@ -108,9 +103,6 @@ class FlowSession(DefaultSession):
         self.csv_line = 0
         self.i=0
         self.countlog = 0
-        self.first = 0
-        self.second = 0
-        self.third = 0
         output = open(self.output_file, "w")
         self.csv_writer = csv.writer(output)
         self.wait_server = False
@@ -257,80 +249,52 @@ class FlowSession(DefaultSession):
                 or flow.duration > 90
             ):
                 data = flow.get_data()
-                c = Client()
-                try:
-                    asn = c.lookup(data["src_ip"]).owner
-                except TypeError:
-                    asn = 'na'
-                except:
-                    asn = 'na'
-                for anscheck in CHECKASN:
-                    if anscheck in asn.lower():
-                        ignore = 1
-                        break
-                    else:
-                        ignore = 0
                 x=np.array(list(map(data.get, FEATURES))).reshape(1,18)
                 x[np.isnan(x)] = 0
-                # x = (x-self.x_min)/(self.x_max-self.x_min)
-                # a=a.reshape(-1, 1)
                 label = self.model.predict(x)
-                # print(data["src_ip"])
-                # print(label)
-                if ignore == 0:
-                    # print(asn.lower())
-                    if label!=[0.]:
-                        with open('/etc/antidos/whitelist') as wl:  
-                            if not data["src_ip"] in wl.read() :
-                                with open('/etc/antidos/blacklist') as bl:
-                                    if not data["src_ip"] in bl.read() :
-                                        fa = open('/etc/antidos/blacklist', "a")
-                                        fa.write(data["src_ip"])
-                                        fa.write("\n")
-                                    os.system("/etc/init.d/antiddos reload")
-                                    if "192.168.1." in data["src_ip"]:
-                                        if "192.168.1." in data["src_ip"]:
-                                            self.first = self.second
-                                            self.second = self.third
-                                            self.third = time.time()
-                                            if (self.third - self.first) < 10 and (self.first != 0):
-                                                logging.error('Your device is attacked with source IP: %s destination IP: %s'%((data["src_ip"]),(data["dst_ip"])))
-
-                                    else:
-                                        logging.error('Your device is attacked with source IP: %s destination IP: %s'%((data["src_ip"]),(data["dst_ip"])))
-                    
+                if label!=[0.]:
                     with open('/etc/antidos/whitelist') as wl:  
                         if not data["src_ip"] in wl.read() :
-                            if self.csv_line == 0:
-                                self.csv_writer.writerow(data.keys())
-                            if label == [0.]:                      
-                                self.csv_writer.writerow(data.values())
-                                self.csv_line += 1
-                                if (self.csv_line % 500)==0:
-                                    if self.check_ftp_sever():
-                                        i=0
-                                        self.csv_line = 0
-                                        for file in self.ftp_server.nlst('files/flows'):
-                                            filename='files/flows/flow'+str(i)+".csv"
-                                            i+=1
-                                            if file != filename:
-                                                break
-                                        filenamesave='files/flows/flow'+str(i)+".csv"
-                                        logging.error("Sending benign flow to an FTP Server and request an update...")
-                                        with open(self.output_file, "rb") as file:
-                                            self.ftp_server.storbinary(f"STOR {filenamesave}", file) 
-                                        
-                                        os.system("touch /etc/antidos/update_required")
-                                        file1 = open("/etc/antidos/update_required","a")
-                                        file1.write(USERNAME)
-                                        file1.close()
-                                        with open("/etc/antidos/update_required", "rb") as file:
-                                            self.ftp_server.storbinary(f"STOR files/update_required", file)                         
-                                        os.remove("/etc/antidos/update_required")
-                                        os.remove(self.output_file)
-                                        self.wait_server=True
-                                        output = open(self.output_file, "w")
-                                        self.csv_writer = csv.writer(output)
+                            with open('/etc/antidos/blacklist') as bl:
+                                if not data["src_ip"] in bl.read() :
+                                    fa = open('/etc/antidos/blacklist', "a")
+                                    fa.write(data["src_ip"])
+                                    fa.write("\n")
+                                os.system("/etc/init.d/antiddos reload")
+                                logging.error('Your device is attacked with source IP: %s destination IP: %s'%((data["src_ip"]),(data["dst_ip"])))
+                
+                with open('/etc/antidos/whitelist') as wl:  
+                    if not data["src_ip"] in wl.read() :
+                        if self.csv_line == 0:
+                            self.csv_writer.writerow(data.keys())
+                        if label == [0.]:                      
+                            self.csv_writer.writerow(data.values())
+                            self.csv_line += 1
+                            if (self.csv_line % 500)==0:
+                                if self.check_ftp_sever():
+                                    i=0
+                                    self.csv_line = 0
+                                    for file in self.ftp_server.nlst('files/flows'):
+                                        filename='files/flows/flow'+str(i)+".csv"
+                                        i+=1
+                                        if file != filename:
+                                            break
+                                    filenamesave='files/flows/flow'+str(i)+".csv"
+                                    logging.error("Sending benign flow to an FTP Server and request an update...")
+                                    with open(self.output_file, "rb") as file:
+                                        self.ftp_server.storbinary(f"STOR {filenamesave}", file) 
+                                    
+                                    os.system("touch /etc/antidos/update_required")
+                                    file1 = open("/etc/antidos/update_required","a")
+                                    file1.write(USERNAME)
+                                    file1.close()
+                                    with open("/etc/antidos/update_required", "rb") as file:
+                                        self.ftp_server.storbinary(f"STOR files/update_required", file)                         
+                                    os.remove("/etc/antidos/update_required")
+                                    os.remove(self.output_file)
+                                    self.wait_server=True
+                                    output = open(self.output_file, "w")
+                                    self.csv_writer = csv.writer(output)
                                         
 
 
