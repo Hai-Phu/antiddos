@@ -40,10 +40,10 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 if not os.path.exists('/etc/antidos'):
     os.makedirs('/etc/antidos')
-copyfile(os.path.join(here, "model/weight.pkl"),'/etc/antidos/weight.pkl')
+copyfile(os.path.join(here, "model/weight.npz"),'/etc/antidos/weight.npz')
 copyfile(os.path.join(here, "lists/blacklist"),'/etc/antidos/blacklist')
 copyfile(os.path.join(here, "lists/whitelist"),'/etc/antidos/whitelist')
-
+copyfile(os.path.join(here, "lists/wwl.txt"),'/etc/antidos/wwl.txt')
 # os.system('chmod +x /etc/antidos/blacklist')
 
 # Import the README and use it as the long-description.

@@ -6,7 +6,6 @@ Home-page: https://gitlab.com/hieulw/cicflowmeter
 Author: Le Hieu
 Author-email: hieulw99@gmail.com
 License: MIT
-Platform: UNKNOWN
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 3
@@ -54,9 +53,7 @@ cicflowmeter -f example.pcap -c flows.csv
 Sniff packets real-time from interface to flow csv: (**need root permission**)
 
 ```
-cicflowmeter -i eth0 -c flows.csv
+antiddos -i wlp3s0 -c flows.csv
 ```
 
 ### Reference: https://www.unb.ca/cic/research/applications.html#CICFlowMeter
-
-

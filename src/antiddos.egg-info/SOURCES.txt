@@ -1,7 +1,5 @@
 LICENSE
-MANIFEST.in
 README.md
-model.sav
 setup.cfg
 setup.py
 src/antiddos/__init__.py

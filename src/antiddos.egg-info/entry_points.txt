@@ -1,3 +1,2 @@
 [console_scripts]
 antiddos = antiddos.sniffer:main
-
